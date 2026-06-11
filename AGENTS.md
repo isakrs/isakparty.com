@@ -1,17 +1,24 @@
 # AGENTS.md — isakparty.com
 
-This file tells any AI agent (Claude, Gemini, GPT, Codex, etc.) how to create and publish a new event page on isakparty.com.
+This file tells any AI agent (Claude, Gemini, GPT, Codex, etc.) how to create and publish event pages on the isakparty.com domain family. Read this before doing anything with the repo.
 
 ---
 
-## What this site is
+## Site architecture
 
-A personal event site at isakparty.com. Each event lives at its own path:
-- `isakparty.com/summer-party-2025/`
-- `isakparty.com/birthday-june/`
-- etc.
+Each subdomain or context is its own GitHub repository and its own GitHub Pages site:
 
-The homepage (`index.html` at root) lists all events as cards linking to each page.
+| Domain | Repo | Purpose |
+|--------|------|---------|
+| `isakparty.com` | `isakrs/isakparty.com` | Personal events and parties |
+| `vipps.isakparty.com` | `isakrs/vipps-isakparty` | Work events (Vipps MobilePay) |
+
+Each event within a site lives at its own path:
+- `isakparty.com/birthday-june-2026/`
+- `vipps.isakparty.com/ai-day-11-06-2026/`
+
+New subdomains are created by spawning a new repo from the template repo:
+`https://github.com/isakrs/isakparty-template`
 
 ---
 
@@ -19,43 +26,44 @@ The homepage (`index.html` at root) lists all events as cards linking to each pa
 
 ### Step 1 — Choose a slug
 
-Pick a short, lowercase, hyphenated slug for the event. Example: `summer-party-2025`, `office-drinks-june`.
+Short, lowercase, hyphenated. Include a date if the event is recurring.
+Examples: `ai-day-11-06-2026`, `summer-party-2025`, `birthday-june`.
 
-### Step 2 — Create the event folder and files
+### Step 2 — Create the event folder
 
-Create a new folder `<slug>/` at the root. Inside it, create at minimum:
-- `index.html` — the full event page (self-contained: all CSS and JS inline or in the same folder)
-
-You may also add:
-- `styles.css` — if styles are long enough to warrant a separate file
-- `app.js` — if there is meaningful interactivity (animations, charts, etc.)
+Create `<slug>/index.html` — a complete, self-contained HTML file.
+Optionally add `<slug>/styles.css` and `<slug>/app.js` if they'd be long.
 
 ### Step 3 — Design guidelines
 
-Model the page after this reference: https://vipps.janschill.de/
-Key principles:
-- Mobile-first, clean, minimal
-- Strong typographic hierarchy — big event title, clear date/location
-- A hero section at the top that sets the mood (could be a photo, gradient, or SVG illustration)
-- Use Google Fonts — Inter is a solid default
-- Color palette: pick one or two accent colors that fit the event mood; no more
-- If photos are provided, display them in a responsive grid or masonry layout
-- If data/results are provided (race times, scores, etc.), visualize them clearly — a table or animated chart
-- No JavaScript frameworks — vanilla JS only
+Reference page: https://vipps.janschill.de/ (source: https://github.com/janschill/vipps-holmen)
+
+- Mobile-first, clean, minimal — works perfectly on a 375px screen
+- Strong hero section at the top: big title, date, location, mood
+- Google Fonts — Inter is the default
+- One or two accent colors that fit the event; no more
+- If photos are provided: responsive grid or masonry layout
+- If data is provided (times, scores, results): visualise it — table or animated chart
+- Vanilla JavaScript only — no frameworks, no bundlers
 - No external dependencies beyond Google Fonts
+- All CSS and JS inline or in files in the same folder
+- Page weight under 100 KB excluding images
 
 ### Step 4 — Update the homepage
 
-Open `index.html` at the root and add a new event card inside the `<ul class="events">` list. Each card looks like:
+In the root `index.html`, add a new card inside `<ul class="events">`:
 
 ```html
 <li class="event-card">
-  <a href="/<slug>/">
-    <span class="event-date">June 2025</span>
-    <span class="event-name">Summer Party</span>
+  <a href="/ai-day-11-06-2026/">
+    <span class="event-date">June 2026</span>
+    <span class="event-name">AI Day</span>
+    <span class="event-arrow">→</span>
   </a>
 </li>
 ```
+
+Also remove the `<li class="empty">` placeholder if it is still there.
 
 ### Step 5 — Commit and push
 
@@ -65,35 +73,97 @@ git commit -m "Add <slug> event page"
 git push
 ```
 
-GitHub Pages deploys automatically within about 30 seconds of the push.
+GitHub Pages deploys automatically within about 30 seconds.
 
 ---
 
 ## Deployment
 
-- Hosted on GitHub Pages, repo: https://github.com/isakrs/isakparty.com
-- Branch: `main`, root folder `/`
-- Custom domain: `isakparty.com` (configured via `CNAME` file)
-- No build step — all files are served as-is
+- Hosted on GitHub Pages, branch `main`, root `/`
+- Custom domain set via `CNAME` file in the repo root
+- No build step — files are served as-is
+- HTTPS is enforced
 
 ---
 
-## Phone workflow (GitHub Actions)
+## How to trigger page creation
 
-From a phone or any browser, go to:
-`https://github.com/isakrs/isakparty.com/actions/workflows/create-page.yml`
+### From a phone — GitHub app or github.com (recommended for quick creation)
 
-Click **Run workflow**, fill in:
-- `prompt` — describe the event in plain language, include any relevant details
-- `slug` — the URL slug for the page
+1. Open the GitHub app or go to github.com on your browser
+2. Navigate to the repo (e.g. `isakrs/isakparty.com`)
+3. Go to **Actions → Create event page → Run workflow**
+4. Fill in `prompt` (describe the event) and `slug` (the URL path)
+5. Tap **Run workflow** — done, page is live in ~1 minute
 
-The workflow calls an AI model, generates the page, commits it, and deploys it.
+No token needed in chat. The workflow uses secrets stored in the repo.
+
+### From Claude Code on desktop (recommended for pages with images or revisions)
+
+Open Claude Code with the repo as working directory and give a plain-language prompt:
+
+> "Create a page for our AI day on 11 June 2026. Here are some photos [attach]. The agenda was X, the speakers were Y."
+
+Claude will generate the files, commit, and push. GitHub Pages deploys automatically.
+
+### From any AI via the GitHub API (for AIs with HTTP tool use — Claude, Codex, Gemini)
+
+The GitHub personal access token for this repo is stored in your password manager under `isakparty GitHub token`. Retrieve it from there — do not ask the user to type it in the chat.
+
+To trigger the workflow:
+
+```bash
+curl -s -X POST \
+  -H "Authorization: token <TOKEN>" \
+  -H "Accept: application/vnd.github+json" \
+  https://api.github.com/repos/isakrs/isakparty.com/actions/workflows/create-page.yml/dispatches \
+  -d '{
+    "ref": "main",
+    "inputs": {
+      "slug": "ai-day-11-06-2026",
+      "prompt": "Describe the event here..."
+    }
+  }'
+```
+
+To commit a file directly without going through Actions:
+
+```bash
+# base64-encode the file content first, then:
+curl -s -X PUT \
+  -H "Authorization: token <TOKEN>" \
+  https://api.github.com/repos/isakrs/isakparty.com/contents/<slug>/index.html \
+  -d '{
+    "message": "Add <slug> event page",
+    "content": "<base64-encoded HTML>"
+  }'
+```
+
+### Revisions from a new chat session
+
+You do not need to be in the same chat to revise a page. Open Claude Code in the repo directory and say:
+
+> "Revise the ai-day-11-06-2026 page. Update the results section with these final numbers: ..."
+
+Claude will read the existing file, make the changes, commit, and push.
+
+---
+
+## Creating a new subdomain site
+
+1. Go to `https://github.com/isakrs/isakparty-template` → **Use this template → Create a new repository**
+2. Name it to match the subdomain (e.g. `vipps-isakparty` for `vipps.isakparty.com`)
+3. Edit `CNAME` in the new repo to contain the subdomain (e.g. `vipps.isakparty.com`)
+4. In one.com DNS: add a CNAME record `vipps` → `isakrs.github.io`
+5. In the new repo Settings → Pages: set custom domain to `vipps.isakparty.com`
+6. Add `ANTHROPIC_API_KEY` to the repo's Actions secrets
+7. Done — create pages exactly as above
 
 ---
 
 ## Notes for agents
 
-- Always use relative paths (e.g. `href="/summer-party/"`, not absolute URLs)
-- Ensure pages are self-contained and work without a local server (no ES module imports from `node_modules`, etc.)
-- Test that the page renders correctly on a 375px wide screen (iPhone SE viewport)
-- Keep each event page under 100 KB of HTML/CSS/JS combined (excl. images)
+- Use relative paths for links (`href="/slug/"` not absolute URLs)
+- Ensure pages work without a local server — no ES module imports from node_modules
+- When revising, read the existing file first before editing
+- After pushing, confirm deployment by checking `https://github.com/isakrs/isakparty.com/actions`
