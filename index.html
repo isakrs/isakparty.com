@@ -382,6 +382,92 @@
       .poster-bottom { padding: 0 0 48px; }
       .poster-url { display: none; }
     }
+
+    /* ── VIPPS MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(4,6,14,.8);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #0f1018;
+      border: 1px solid rgba(61,232,224,.25);
+      border-radius: 20px;
+      padding: 36px 32px 32px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 80px rgba(61,232,224,.12);
+      animation: modal-in .2s ease;
+    }
+
+    @keyframes modal-in {
+      from { opacity: 0; transform: scale(.95) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-tier {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 12px;
+    }
+
+    .modal-price {
+      font-size: 4rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+
+    .modal-body {
+      font-size: 15px;
+      line-height: 1.6;
+      color: rgba(255,255,255,.75);
+      margin-bottom: 28px;
+    }
+
+    .modal-body strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .modal-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    .modal-close {
+      margin-top: 20px;
+      background: none;
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: border-color .2s, color .2s;
+      font-family: inherit;
+    }
+
+    .modal-close:hover { border-color: rgba(255,255,255,.3); color: var(--text); }
   </style>
 </head>
 <body>
@@ -427,26 +513,39 @@
     <div class="poster-bottom">
       <p class="poster-doors">Doors open at 9PM</p>
       <div class="ticket-tiers">
-        <a class="tier" href="#pay" onclick="alert('Payment link coming soon!')">
+        <button class="tier" onclick="openModal('Standard','$15')">
           <div class="tier-name">Standard</div>
           <div class="tier-price">$15</div>
-          <div class="tier-cta">Pay now</div>
-        </a>
-        <a class="tier featured" href="#pay" onclick="alert('Payment link coming soon!')">
+          <div class="tier-cta">Get in</div>
+        </button>
+        <button class="tier featured" onclick="openModal('Dancer','$25')">
           <div class="tier-name">Dancer</div>
           <div class="tier-price">$25</div>
-          <div class="tier-cta">Pay now</div>
-        </a>
-        <a class="tier" href="#pay" onclick="alert('Payment link coming soon!')">
+          <div class="tier-cta">Get in</div>
+        </button>
+        <button class="tier" onclick="openModal('Star','$40')">
           <div class="tier-name">Star</div>
           <div class="tier-price">$40</div>
-          <div class="tier-cta">Pay now</div>
-        </a>
+          <div class="tier-cta">Get in</div>
+        </button>
       </div>
     </div>
   </div>
 
   <div class="poster-url">www.isakparty.com</div>
+</div>
+
+<!-- ── Vipps modal ── -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-tier" id="modal-tier">Standard</div>
+    <div class="modal-price" id="modal-price">$15</div>
+    <div class="modal-body">
+      Vipps your friend for entry and a <strong>fabulous experience</strong>.<br>
+      <div class="modal-note">Include your tier in the message — we'll find you at the door.</div>
+    </div>
+    <button class="modal-close" onclick="closeModal()">Close</button>
+  </div>
 </div>
 
 <!-- ── Events ── -->
@@ -460,6 +559,25 @@
 </div>
 
 <footer>isakparty.com &nbsp;&middot;&nbsp; afterski forever</footer>
+
+<script>
+  function openModal(tier, price) {
+    document.getElementById('modal-tier').textContent = tier;
+    document.getElementById('modal-price').textContent = price;
+    document.getElementById('modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(e) {
+    if (e && e.target !== document.getElementById('modal')) return;
+    document.getElementById('modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
 
 </body>
 </html>
